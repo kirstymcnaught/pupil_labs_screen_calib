@@ -10,7 +10,7 @@ if __name__ == '__main__':
     myApp = QApplication(sys.argv)
     # Create a label and set its properties
     appLabel = QQuickView()
-    appLabel.setSource(QUrl('basic.qml'))
+    appLabel.setSource(QUrl('layout.qml'))
     context = appLabel.rootContext()
     root = appLabel.rootObject()
 
