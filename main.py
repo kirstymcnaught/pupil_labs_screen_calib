@@ -20,8 +20,6 @@ if __name__ == '__main__':
     pupil = PupilController()
     context.setContextProperty('pupil', pupil)
 
-    pupil.ready.connect(root.onPupilReady)
-
     # Launch the app
     view.show()
     myApp.exec_()

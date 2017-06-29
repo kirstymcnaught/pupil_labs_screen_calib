@@ -9,8 +9,8 @@ from PyQt5.QtGui import *
 
 import zmq, msgpack, time
 
+# convenience functions for sending zmq messages
 
-#convenience functions
 def send_recv_notification(req, n):
     # REQ REP requirese lock step communication with multipart msg (topic,msgpack_encoded dict)
     print('send_recv_notification({})'.format(n))
@@ -24,9 +24,16 @@ def get_pupil_timestamp(req):
 
 
 class PupilController(QObject):
+    """ A class that knows how to talk to the pupil over zeromq.
 
-    ready = pyqtSignal()
-    ref_data = []
+        Provides functionality for connecting to the camera and
+        computing calibration based on user-defined samples.
+
+        This is a QObject that can be passed to QML such that any
+        slots can be called directly from the GUI.
+        """
+
+    ref_data = [] # stores interim calibration data
 
     def __init__(self):
         QObject.__init__(self)
@@ -46,9 +53,6 @@ class PupilController(QObject):
         print(send_recv_notification(self.req, n))
         time.sleep(2)
 
-        # Emit the signal.
-        self.ready.emit()
-
     @pyqtSlot(int, int)
     def start_calib(self, frameWidth, frameHeight) :
         self.ref_data = []
@@ -62,8 +66,6 @@ class PupilController(QObject):
               'hmd_video_frame_size':(frameWidth, frameHeight),
               'outlier_threshold':35 }
         print(send_recv_notification(self.req, n))
-
-        self.ready.emit()
 
     @pyqtSlot(int, int)
     def add_current_point_to_calib(self, screen_x, screen_y):
