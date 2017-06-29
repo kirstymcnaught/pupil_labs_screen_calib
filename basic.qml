@@ -5,11 +5,18 @@ Rectangle {
     id: top
     width: 800; height: 800
 
+    function onPupilReady() {
+        console.log('pupil is ready!')
+    }
+
     Button {
         id: btn
         anchors.centerIn: parent
         text: "Click to start"
         onClicked: {
+//            pupil.start_calib(500,500)
+
+            pupil.start_calib(top.width, top.height)
             circle.visible = true
             btn.visible = false
 //            waitTimer.start()
@@ -75,7 +82,7 @@ Rectangle {
                     PropertyAnimation { target: circle; property: "r"; to: 5; duration: circle.animTime }
                 }
                 onStopped: {
-                    console.log('stopped')
+                    console.log('stimulus complete')
                     stimulus.next()
                 }
             }

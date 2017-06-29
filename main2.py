@@ -11,10 +11,14 @@ if __name__ == '__main__':
     # Create a label and set its properties
     appLabel = QQuickView()
     appLabel.setSource(QUrl('basic.qml'))
+    context = appLabel.rootContext()
+    root = appLabel.rootObject()
 
     pupil = PupilController()
     context.setContextProperty('PyConsole', pupil)
     context.setContextProperty('pupil', pupil)
+
+    pupil.ready.connect(root.onPupilReady)
 
     # Show the Label
     appLabel.show()
