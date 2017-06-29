@@ -5,10 +5,6 @@ Rectangle {
     id: top
     width: 600; height: 600
 
-    function onPupilReady() {
-        console.log('pupil is ready!')
-    }
-
     Text {
         id: txtComplete
         visible: false
@@ -24,10 +20,11 @@ Rectangle {
         text: "Click to start calibration"
         onClicked: {
             pupil.start_calib(top.width, top.height)
+            stimulus.next()
+
             circle.visible = true
             btn.visible = false
             txtComplete.visible = false
-            stimulus.next()
         }
     }
 
@@ -35,14 +32,18 @@ Rectangle {
         id: stimulus
         width: 50
         height: 50
-        x: 50
-        y: 50
+        x: xDiff/2
+        y: yDiff/2
+
+        property int numStimPerRowOrCol: 3
+        property int xDiff: top.width/numStimPerRowOrCol
+        property int yDiff: top.height/numStimPerRowOrCol
 
         property bool started: false
 
         function next() {
             if (started) {
-                x += 250;
+                x += xDiff;
             }
             else {
                 started = true;
@@ -50,8 +51,8 @@ Rectangle {
 
             var x_wrap = x % top.width
             if (x_wrap < x) {
-                y += 125;
-                x = x_wrap
+                y += yDiff;
+                x = xDiff/2
             }
 
             var y_wrap = y % top.width
@@ -78,6 +79,8 @@ Rectangle {
             property int maxWidth: 50
             property int animTime: 250
 
+            // Animation controls the stimulus presentation, once it's complete
+            // we record gaze position for calibration.
             SequentialAnimation {
                 id: anim
 

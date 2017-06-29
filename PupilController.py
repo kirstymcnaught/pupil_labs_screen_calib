@@ -43,10 +43,13 @@ class PupilController(QObject):
         self.req = ctx.socket(zmq.REQ)
         self.req.connect('tcp://localhost:50020')
 
-        self.start_pupil();
+        # Hmm, I think it's better to start the eye processes manually
+        # in pupil_capture.exe before running this app
+        # self.start_pupil();
 
     def start_pupil(self):
-        # set start eye windows
+        ''' Start pupil's eye processes.
+        '''
         n = {'subject':'eye_process.should_start.0','eye_id':0, 'args':{}}
         print(send_recv_notification(self.req, n))
         n = {'subject':'eye_process.should_start.1','eye_id':1, 'args':{}}
@@ -55,6 +58,8 @@ class PupilController(QObject):
 
     @pyqtSlot(int, int)
     def start_calib(self, frameWidth, frameHeight) :
+        ''' Start the calibration process
+        '''
         self.ref_data = []
 
         # set calibration method to hmd calibration
@@ -64,13 +69,15 @@ class PupilController(QObject):
         # start calibration routine with params. This will make pupil start sampling pupil data.
         n = { 'subject':'calibration.should_start',
               'hmd_video_frame_size':(frameWidth, frameHeight),
-              'outlier_threshold':35 }
+              'outlier_threshold':85 }
         print(send_recv_notification(self.req, n))
 
     @pyqtSlot(int, int)
     def add_current_point_to_calib(self, screen_x, screen_y):
+        ''' Store the current gaze point and associated ground truth coords
+        '''
         t = get_pupil_timestamp(self.req)
-        print('add calib point ({}, {});'.format(screen_x, screen_y))
+        print('add calib point ({}, {})'.format(screen_x, screen_y))
         pos = (screen_x, screen_y)
         datum0 = { 'norm_pos':pos,'timestamp':t,'id':0 }
         datum1 = { 'norm_pos':pos,'timestamp':t,'id':1 }
@@ -80,6 +87,8 @@ class PupilController(QObject):
 
     @pyqtSlot()
     def finish_calib(self):
+        ''' Send all stored calibration points to pupil for calibration.
+        '''
         # Send ref data to Pupil Capture/Service:
         # This notification can be sent once at the end or multiple times.
         # During one calibraiton all new data will be appended.
@@ -90,10 +99,6 @@ class PupilController(QObject):
         # Pupil will correlate pupil and ref data based on timestamps,
         # compute the gaze mapping params, and start a new gaze mapper.
         n = {'subject':'calibration.should_stop'}
-        print(send_recv_notification(self.req, n))
-
-        time.sleep(2)
-        n = {'subject':'service_process.should_stop'}
         print(send_recv_notification(self.req, n))
 
 
