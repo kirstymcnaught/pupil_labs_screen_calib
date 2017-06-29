@@ -3,23 +3,30 @@ import QtQuick.Controls 1.2
 
 Rectangle {
     id: top
-    width: 800; height: 800
+    width: 600; height: 600
 
     function onPupilReady() {
         console.log('pupil is ready!')
     }
 
+    Text {
+        id: txtComplete
+        visible: false
+        text: "Calibration complete"
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: btn.top
+        anchors.bottomMargin: 50
+    }
+
     Button {
         id: btn
         anchors.centerIn: parent
-        text: "Click to start"
+        text: "Click to start calibration"
         onClicked: {
-//            pupil.start_calib(500,500)
-
             pupil.start_calib(top.width, top.height)
             circle.visible = true
             btn.visible = false
-//            waitTimer.start()
+            txtComplete.visible = false
             stimulus.next()
         }
     }
@@ -50,12 +57,15 @@ Rectangle {
             var y_wrap = y % top.width
             if (y_wrap < y) {
                 console.log('finished')
+                pupil.finish_calib()
+                txtComplete.visible = true
+                btn.visible = true
             }
             else {
                 circle.r = 35;
                 anim.restart();
             }
-        }
+        }                
 
 
         Circle {
@@ -82,7 +92,7 @@ Rectangle {
                     PropertyAnimation { target: circle; property: "r"; to: 5; duration: circle.animTime }
                 }
                 onStopped: {
-                    console.log('stimulus complete')
+                    pupil.add_current_point_to_calib(stimulus.x, stimulus.y)
                     stimulus.next()
                 }
             }
